@@ -1,12 +1,16 @@
-#include "stdafx.h"
+#include "pch.h"
+#include <iostream>
 #include <clocale>
-#include <time.h>
 #include <iostream>
 using namespace std;
 
-template <class T, class M>
 class Monitors {
 private:
+	bool colored; // Цветные, монохромные.
+	char * inform; // Алфавитно-цифровые, графические.
+protected:
+	int Height; // в пикселях
+	int Width; // в пикселях
 	int type; /*
 			  1 - Электроннолучевой монитор;
 			  2 - Жидкокристаллический монитор;
@@ -17,44 +21,87 @@ private:
 			  7 - Виртуальный ретинальный монитор;
 			  8 - Лазерный монитор.
 			  */
-	bool colored; // Цветные, монохромные.
-	char * inform; // Алфавитно-цифровые, графические.
-	
-protected:
-	T Height; // в пикселях
-	T Width; // в пикселях
-	M diagonal; // в дюймах
+	double diagonal; // диагональ
 public:
-	Monitors() {
-		Height = 1280;
-		Width = 720;
-		type = 8;
-		colored = false;
-		char * sos = "графический";
-		inform = new char[strlen(sos) + 1];
-		strcpy(inform, sos);
-		diagonal = 22;
-	};
-	Monitors(T h, T w, int t, bool c, char* i, M d) {
-		Height = h;
-		Width = w;
-		type = t;
-		colored = c;
-		inform = new char[strlen(i) + 1];
-		strcpy(inform, i);
-		diagonal = d;
-	};
-	Monitors(T h, T w) {
-		Height = h;
-		Width = w;
-		type = 5;
-		colored = false;
-		char * sos = "алфавитно-цифровой";
-		inform = new char[strlen(sos) + 1];
-		strcpy(inform, sos);
-		diagonal = 22;
-	};
-	Monitors(const Monitors &m) {
+	Monitors();
+	Monitors(int h, int w, int t, bool c, const char* i, double d);
+	Monitors(int h, int w);
+	Monitors(const Monitors &m);
+	~Monitors();
+	void input(int h, int w, int t, bool c, const char * i, double d);
+	void print();
+	Monitors copy(const Monitors& m);
+	Monitors sum(const Monitors& b);
+	bool comp(const Monitors& b);
+	Monitors & operator + (Monitors a);
+	Monitors & operator - (Monitors a);
+	bool operator > (Monitors a);
+	bool operator < (Monitors a);
+	Monitors & operator = (const Monitors& a);
+};
+
+Monitors::Monitors() {
+	Height = 1280;
+	Width = 720;
+	type = 8;
+	colored = false;
+	const char * sos = "графический";
+	inform = new char[strlen(sos) + 1];
+	strcpy(inform, sos);
+	diagonal = 16.1;
+}
+Monitors::Monitors(int h, int w, int t, bool c, const char* i, double d) {
+	Height = h;
+	Width = w;
+	type = t;
+	colored = c;
+	inform = new char[strlen(i) + 1];
+	strcpy(inform, i);
+	diagonal = d;
+};
+Monitors::Monitors(int h, int w) {
+	Height = h;
+	Width = w;
+	type = 5;
+	colored = false;
+	const char * sos = "алфавитно-цифровой";
+	inform = new char[strlen(sos) + 1];
+	strcpy(inform, sos);
+	diagonal = 27.8;
+};
+Monitors::Monitors(const Monitors &m) {
+	Height = m.Height;
+	Width = m.Width;
+	type = m.type;
+	colored = m.colored;
+	inform = new char[strlen(m.inform) + 1];
+	strcpy(inform, m.inform);
+	diagonal = m.diagonal;
+};
+Monitors::~Monitors() {
+	delete[] inform;
+};
+void Monitors::input(int h, int w, int t, bool c, const char * i, double d) {
+	Height = h;
+	Width = w;
+	type = t;
+	colored = c;
+	inform = new char[strlen(i) + 1];
+	strcpy(inform, i);
+	diagonal = d;
+};
+void Monitors::print() {
+	cout << Height << endl;
+	cout << Width << endl;
+	cout << type << endl;
+	colored ? cout << "true" : cout << "false";
+	cout << endl;
+	cout << inform << endl;
+	cout << diagonal << endl;
+};
+Monitors Monitors::copy(const Monitors& m) {
+	Monitors h;
+	if (&m != this) {
 		Height = m.Height;
 		Width = m.Width;
 		type = m.type;
@@ -62,236 +109,262 @@ public:
 		inform = new char[strlen(m.inform) + 1];
 		strcpy(inform, m.inform);
 		diagonal = m.diagonal;
-	};
-	~Monitors() {
-		delete[] inform;
-	};
-	void input(T h, T w, int t, bool c, char * i, M d) {
-		Height = h;
-		Width = w;
-		type = t;
-		colored = c;
-		inform = new char[strlen(i) + 1];
-		strcpy(inform, i);
-		diagonal = d;
-	};
-	void print() {
-		cout << Height << endl;
-		cout << Width << endl;
-		cout << type << endl;
-		colored ? cout << "true" : cout << "false";
-		cout << endl;
-		cout << inform << endl;
-		cout << diagonal << endl;
-	};
-	Monitors copy(const Monitors& m) {
-		Monitors h;
-		if (&m != this) {
-			Height = m.Height;
-			Width = m.Width;
-			type = m.type;
-			colored = m.colored;
-			inform = new char[strlen(m.inform) + 1];
-			strcpy(inform, m.inform);
-			diagonal = m.diagonal;
-		}
-		return (h);
 	}
-	Monitors sum(const Monitors& b) {
-		Monitors h;
-		h.Height = Height + b.Height;
-		h.Width = Width + b.Width;
-		h.type = b.type;
-		h.colored = b.colored;
-		h.inform = new char[strlen(b.inform) + 1];
-		strcpy(h.inform, b.inform);
-		h.diagonal = b.diagonal;
-		return (h);
-	}
-	bool comp(const Monitors& b) {
-		return ((Height * Width) >= (b.Height * b.Width));
-	}
+	return (h);
+}
+Monitors Monitors::sum(const Monitors& b) {
+	Monitors h;
+	h.Height = Height + b.Height;
+	h.Width = Width + b.Width;
+	h.type = b.type;
+	h.colored = b.colored;
+	h.inform = new char[strlen(b.inform) + 1];
+	strcpy(h.inform, b.inform);
+	h.diagonal = b.diagonal;
+	return (h);
+}
+bool Monitors::comp(const Monitors& b) {
+	return ((Height * Width) >= (b.Height * b.Width));
+}
+Monitors & Monitors::operator + (Monitors a) {
+	Height += a.Height;
+	Width += a.Height;
+	return(*this);
+}
+Monitors & Monitors::operator - (Monitors a) {
+	Height -= a.Height;
+	Width -= a.Height;
+	return(*this);
+}
+bool Monitors::operator > (Monitors a) {
+	return ((Height * Width) > (a.Height * a.Width));
+}
+bool Monitors::operator < (Monitors a) {
+	return ((Height * Width) < (a.Height * a.Width));
+}
+Monitors & Monitors::operator = (const Monitors& a) {
+	Height = a.Height;
+	Width = a.Height;
+	type = a.type;
+	colored = a.colored;
+	delete[] inform;
+	inform = new char[strlen(a.inform) + 1];
+	strcpy(inform, a.inform);
+	diagonal = a.diagonal;
+	return(*this);
+}
 
-	Monitors & operator + (Monitors a) {
-		Height += a.Height;
-		Width += a.Height;
-		return(*this);
-	}
-	Monitors & operator - (Monitors a) {
-		Height -= a.Height;
-		Width -= a.Height;
-		return(*this);
-	}
-	bool operator == (Monitors a) {
-		return ((Height * Width) == (a.Height * a.Width));
-	}
-	bool operator > (Monitors a) {
-		return ((Height * Width) > (a.Height * a.Width));
-	}
-	bool operator < (Monitors a) {
-		return ((Height * Width) < (a.Height * a.Width));
-	}
-	Monitors & operator = (Monitors a) {
-		Height = a.Height;
-		Width = a.Width;
-		type = a.type;
-		colored = a.colored;
-		delete[] inform;
-		inform = new char[strlen(a.inform) + 1];
-		strcpy(inform, a.inform);
-		diagonal = a.diagonal;
-		return(*this);
-	}
-};
-
-template <class O>
+																		// Class PC
 class PC {
 private:
 	char* color;
 	int Length; // mm
 protected:
-	O HDD; // Gb
-	O RAM; // Gb
+	int HDD; // Gb
+	int RAM; // Gb
 	char* CPU;
 	char* Card;
 public:
-	PC() {
-		color = new char [strlen("black") + 1];
-		strcpy(color, "black");
-		Length = 380;
-		HDD = 1000;
-		RAM = 8;
-		CPU = new char [strlen("Core i5 9400F") + 1];
-		strcpy(CPU, "Core i5 9400F");
-		Card = new char [strlen("Core i5 9400F") + 1];
-		strcpy(Card, "GeForce GTX 1660");
-	}
-	PC(char* c, int l, O H, O R, char* C, char* card) {
-		color = new char [strlen(c) + 1];
-		strcpy(color, c);
-		Length = l;
-		HDD = H;
-		RAM = R;
-		CPU = new char [strlen(C) + 1];
-		strcpy(CPU, C);
-		Card = new char [strlen(card) + 1];
-		strcpy(Card, card);
-	}
-	PC(const PC &m) {
-		color = new char [strlen(m.color) + 1];
-		strcpy(color, m.color);
-		Length = m.Length;
-		HDD = m.HDD;
-		RAM = m.RAM;
-		CPU = new char [strlen(m.CPU) + 1];
-		strcpy(CPU, m.CPU);
-		Card = new char [strlen(m.Card) + 1];
-		strcpy(Card, m.Card);
-	}
-	void input(char* c, int l, O H, O R, char C, char* card) {
-		color = new char [strlen(c) + 1];
-		strcpy(color, c);
-		Length = l;
-		HDD = H;
-		RAM = R;
-		CPU = new char [strlen(C) + 1];
-		strcpy(CPU, C);
-		Card = new char [strlen(card) + 1];
-		strcpy(Card, card);
-	}
-	void print() {
-		cout << color << endl;
-		cout << Length << endl;
-		cout << HDD << endl;
-		cout << RAM << endl;
-		cout << CPU << endl;
-		cout << Card << endl;
-	}
+	PC();
+	PC(const char* c, int l, int H, int R, const char* C, const char* card);
+	PC(const PC &m);
+	~PC();
+	void input(char* c, int l, int H, int R, const char* C, const char* card);
+	void print();
+	PC& operator = (const PC& a);
+	bool bolshe(const PC& b);
 };
 
-template <class T, class M, class O>
-class Monoblocks: public Monitors< T, M>, public PC <O>  {
+PC::PC() {
+	color = new char[strlen("black") + 1];
+	strcpy(color, "black");
+	Length = 380;
+	HDD = 1000;
+	RAM = 8;
+	CPU = new char[strlen("Core i5 9400F") + 1];
+	strcpy(CPU, "Core i5 9400F");
+	Card = new char[strlen("GeForce GTX 1660") + 1];
+	strcpy(Card, "GeForce GTX 1660");
+}
+PC::PC(const char* c, int l, int H, int R, const char* C, const char* card) {
+	color = new char[strlen(c) + 1];
+	strcpy(color, c);
+	Length = l;
+	HDD = H;
+	RAM = R;
+	CPU = new char[strlen(C) + 1];
+	strcpy(CPU, C);
+	Card = new char[strlen(card) + 1];
+	strcpy(Card, card);
+}
+PC::PC(const PC &m) {
+	color = new char[strlen(m.color) + 1];
+	strcpy(color, m.color);
+	Length = m.Length;
+	HDD = m.HDD;
+	RAM = m.RAM;
+	CPU = new char[strlen(m.CPU) + 1];
+	strcpy(CPU, m.CPU);
+	Card = new char[strlen(m.Card) + 1];
+	strcpy(Card, m.Card);
+}
+PC::~PC() {
+	delete[] color;
+	delete[] CPU;
+	delete[] Card;
+}
+void PC::input(char* c, int l, int H, int R, const char* C, const char* card) {
+	color = new char[strlen(c) + 1];
+	strcpy(color, c);
+	Length = l;
+	HDD = H;
+	RAM = R;
+	CPU = new char[strlen(C) + 1];
+	strcpy(CPU, C);
+	Card = new char[strlen(card) + 1];
+	strcpy(Card, card);
+}
+void PC::print() {
+	cout << color << endl;
+	cout << Length << endl;
+	cout << HDD << endl;
+	cout << RAM << endl;
+	cout << CPU << endl;
+	cout << Card << endl;
+}
+PC& PC::operator = (const PC& a){
+	color = new char[strlen(a.color) + 1];
+	strcpy(color, a.color);
+	Length = a.Length;
+	HDD = a.HDD;
+	RAM = a.RAM;
+	Card = new char[strlen(a.Card) + 1];
+	strcpy(Card, a.Card);
+	return(*this);
+}
+bool PC::bolshe(const PC& b){
+	return HDD >= b.HDD;
+}
+																	// class Monoblocks 
+
+class Monoblocks : public Monitors, public PC {
 private:
 	double Weight; // kg
 public:
-	Monoblocks() {
-		Weight = 6.17;
-		HDD = 500;
-		RAM = 4;
-		CPU = new char[strlen("Celeron N3350") + 1];
-		strcpy(CPU, "Celeron N3350");
-		Height = 1080;
-		Width = 1920;
-		diagonal = 21.5;
-	}
-	Monoblocks(double W, O h, O r, char* c, T H, T w, M d) {
-		Weight = W;
-		HDD = h;
-		RAM = r;
-		CPU = new char[strlen(c) + 1];
-		strcpy(CPU, c);
-		Height = H;
-		Width = w;
-		diagonal = d;
-	}
-	Monoblocks(const Monoblocks &m) {
-		Weight = m.Weight;
-		Height = m.Height;
-		Width = m.Width;
-		HDD = m.HDD;
-		RAM = m.RAM;
-		CPU = new char[strlen(m.CPU) + 1];
-		strcpy(CPU, m.CPU);
-		diagonal = m.diagonal;
-	}
-	void input(double W, O h, O r, char* c, T H, T w, M d) {
-		Weight = W;
-		HDD = h;
-		RAM = r;
-		CPU = new char[strlen(c) + 1];
-		strcpy(CPU, c);
-		Height = H;
-		Width = w;
-		diagonal = d;
-	};
-	void print() {
-		cout << Weight << endl;
-		cout << HDD << endl;
-		cout << RAM << endl;
-		cout << CPU << endl;
-		cout << Height << endl;
-		cout << Width << endl;
-		cout << diagonal << endl;
-	};
-
+	Monoblocks();
+	Monoblocks(double weight, int h, int w, double d, int Hd, int r, const char * s, const char* card);
+	Monoblocks(const Monoblocks &m);
+	~Monoblocks();
+	void input(double weight, int h, int w, double d, int Hd, int r, const char * s, const char* card);
+	void print();
+	Monoblocks& operator = (const Monoblocks& a);
 };
 
-template <class N>
-void copy(N a[], N b[], int n) {
-	for (int i = 0; i < n; i++) {
-		a[i] = b[i];
-	}
+Monoblocks::Monoblocks() :Monitors(), PC() {
+	Weight = 6.17;
+	HDD = 500;
+	RAM = 4;
+	CPU = new char[strlen("Celeron N3350") + 1];
+	strcpy(CPU, "Celeron N3350");
+	Height = 1080;
+	Width = 1920;
+	diagonal = 21.5;
+	Card = new char[strlen("GeForce GTX 980") + 1];
+	strcpy(Card, "GeForce GTX 980");
+
+}
+Monoblocks::Monoblocks(double weight, int h, int w, double d, int Hd, int r, const char * s, const char * card):Monitors(h,w,1,true,"алфавитный",d),PC("red",300,Hd,r,s,card) {
+	Weight = weight;
+	HDD = Hd;
+	RAM = r;
+	CPU = new char[strlen(s) + 1];
+	strcpy(CPU, s);
+	Height = h;
+	Width = w;
+	diagonal = d;
+	Card = new char[strlen(card) + 1];
+	strcpy(Card, card);
+}
+
+Monoblocks::Monoblocks(const Monoblocks &m) :Monitors(m), PC(m) {
+	Weight = m.Weight;
+	Height = m.Height;
+	Width = m.Width;
+	HDD = m.HDD;
+	RAM = m.RAM;
+	CPU = new char[strlen(m.CPU) + 1];
+	strcpy(CPU, m.CPU);
+	diagonal = m.diagonal;
+	Card = new char[strlen(m.Card) + 1];
+	strcpy(Card, m.Card);
+}
+
+Monoblocks::~Monoblocks() {
+}
+
+void Monoblocks::input(double weight, int h, int w, double d, int Hd, int r, const char * s, const char* card) {
+	Weight = weight;
+	HDD = Hd;
+	RAM = r;
+	CPU = new char[strlen(s) + 1];
+	strcpy(CPU, s);
+	Height = h;
+	Width = w;
+	diagonal = d;
+	Card = new char[strlen(card) + 1];
+	strcpy(Card, card);
+}
+
+void Monoblocks::print() {
+	cout << Weight << endl;
+	cout << HDD << endl;
+	cout << RAM << endl;
+	cout << CPU << endl;
+	cout << Height << endl;
+	cout << Width << endl;
+	cout << diagonal << endl;
+	cout << Card << endl;
+}
+
+Monoblocks& Monoblocks::operator = (const Monoblocks& a) {
+	Monitors::operator=(a);
+	PC::operator=(a);
+	Weight = a.Weight;
+	HDD = a.HDD;
+	RAM = a.RAM;
+	Height = a.Height;
+	Width = a.Width;
+	delete[] CPU;
+	CPU = new char[strlen(a.CPU) + 1];
+	strcpy(CPU, a.CPU);
+	diagonal = a.diagonal;
+	delete[] Card;
+	Card = new char[strlen(a.Card) + 1];
+	strcpy(Card, a.Card);
+	return(*this);
 }
 
 int main() {
-	srand(time(0));
 	setlocale(LC_ALL, "Russian");
-	Monitors <double, char> monitor3(1920.58, 1080.25, 3, true, "графический", 134);
-	PC <int> PC1, PC2("gold", 250, 800, 16, "Ryzen 5 2500X", "Radeon RX 5500XT");
-	Monoblocks <int, float, float> MB1, MB2(5.5, 1000, 8, "A4 9125", 1600, 1200, 27.3), MB3(MB2);
-	PC1.print();
-	cout << endl;
-	PC2.print();
-	cout << endl;
-	cout << endl;
+	Monitors monitor1;
+	PC pc1, pc2("black", 450, 444, 16, "Intel Core i9", "GeForce GT 960");
+	Monoblocks MB1, MB2(3.70,1920,860,25.15,800,16,"Celeron N230","GeForce GTX 1660"), MB3(MB1);
+	cout << "Monitors:\n";
+	monitor1.print();
+	cout << endl << "PC:\n";
+	pc1.print();
+	cout << endl << "Monoblocks:\n";;
 	MB1.print();
 	cout << endl;
 	MB2.print();
 	cout << endl;
 	MB3.print();
+	cout << endl << "copy and summa\n";
+	MB1.copy(MB2.sum(MB2));
+	MB3.print();
 	cout << endl;
-	MB1.input(7.38, 128, 2,"Pentium J5005", 1280, 720, 25.32);
 	MB1.print();
+	cout << "результат сравнения объема жестких дисков: " << MB1.bolshe(MB2) << endl;
 	system("pause");
 	return 0;
 }
